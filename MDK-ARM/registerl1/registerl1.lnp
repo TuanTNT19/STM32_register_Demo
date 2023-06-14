@@ -1,0 +1,25 @@
+--cpu Cortex-M3
+"registerl1\startup_stm32f103xb.o"
+"registerl1\main.o"
+"registerl1\stm32f1xx_it.o"
+"registerl1\stm32f1xx_hal_msp.o"
+"registerl1\stm32f1xx_hal_gpio_ex.o"
+"registerl1\stm32f1xx_hal_tim.o"
+"registerl1\stm32f1xx_hal_tim_ex.o"
+"registerl1\stm32f1xx_hal.o"
+"registerl1\stm32f1xx_hal_rcc.o"
+"registerl1\stm32f1xx_hal_rcc_ex.o"
+"registerl1\stm32f1xx_hal_gpio.o"
+"registerl1\stm32f1xx_hal_dma.o"
+"registerl1\stm32f1xx_hal_cortex.o"
+"registerl1\stm32f1xx_hal_pwr.o"
+"registerl1\stm32f1xx_hal_flash.o"
+"registerl1\stm32f1xx_hal_flash_ex.o"
+"registerl1\stm32f1xx_hal_exti.o"
+"registerl1\system_stm32f1xx.o"
+"registerl1\lib.o"
+"registerl1\gpio.o"
+--library_type=microlib --strict --scatter "registerl1\registerl1.sct"
+--summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
+--info sizes --info totals --info unused --info veneers
+--list "registerl1.map" -o registerl1\registerl1.axf
