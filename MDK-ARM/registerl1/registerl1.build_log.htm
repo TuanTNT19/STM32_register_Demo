@@ -28,13 +28,19 @@ Project File Date:  06/14/2023
 *** Using Compiler 'V5.06 update 1 (build 61)', folder: 'D:\keilc\ARM\ARMCC\Bin'
 Build target 'registerl1'
 compiling main.c...
-../Core/Src/main.c(119): warning:  #1-D: last line of file ends without a newline
+../Core/Src/main.c(57): warning:  #61-D: integer operation result is out of range
+  		
+PIOA->CRL |= (10<<28);
+../Core/Src/main.c(57): warning:  #68-D: integer conversion resulted in a change of sign
+  		
+PIOA->CRL |= (10<<28);
+../Core/Src/main.c(123): warning:  #1-D: last line of file ends without a newline
   }
-../Core/Src/main.c: 1 warning, 0 errors
+../Core/Src/main.c: 3 warnings, 0 errors
 linking...
-Program Size: Code=248 RO-data=268 RW-data=12 ZI-data=1028  
+Program Size: Code=396 RO-data=268 RW-data=12 ZI-data=1028  
 FromELF: creating hex file...
-"registerl1\registerl1.axf" - 0 Error(s), 1 Warning(s).
+"registerl1\registerl1.axf" - 0 Error(s), 3 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -57,7 +63,7 @@ Package Vendor: Keil
 <h2>Collection of Component Files used:</h2>
 
    * Component: ARM::CMSIS:CORE:4.3.0
-Build Time Elapsed:  00:00:00
+Build Time Elapsed:  00:00:01
 </pre>
 </body>
 </html>
