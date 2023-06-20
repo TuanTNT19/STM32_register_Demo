@@ -21,22 +21,55 @@ void delay_ms(uint16_t ms)
 		delay_us(1000);
 	}
 }
+void GPIO_config()
+{
+	RCC->APB2ENR |= (1<<2);//enable clock for gpioa
+	// config gpioa pin 2 as alternative function TX
+	GPIOA->CRL &= (0xFFFFF0FF);
+	GPIOA-> CRL |= (10<<8);
+		// config gpioa pin 3 as alternative function RX
+	GPIOA->CRL &= (0xFFFF0FFF);
+	GPIOA->CRL |= (4<<12);
+	
 
-
+}
+void USART2_config()
+{
+	RCC->APB1ENR |= (1<<17);//enable clock for USART2
+	USART2->BRR |= 833;
+	USART2->CR1 |= (1<<13);
+	USART2->CR1 |=(1<<3);
+	
+}
+void USART2_Send_char(char str)
+{
+	while (!(USART2->SR & USART_SR_TXE));
+	USART2->DR=str;
+}
+void USART2_Send_String(char *ch)
+{
+	while (*ch)
+	{
+		 USART2_Send_char(*ch++);
+	}
+}
+//void USART2_Receive_data(char *k)
+//{
+//		while (!(USART2->SR & USART_SR_RXNE));
+//	  *k = USART2->DR;
+//	  *k++;
+//}
 int main(void)
 {
-
+	GPIO_config();
+	USART2_config();
 	TIM2_config();
-  RCC->APB2ENR |= (1<<4);
-	GPIOC-> CRH &= (0xFF0FFFFF);
-	GPIOC-> CRH |= (2<<20);
-	
-    while (1)
-    {
-	     GPIOC-> ODR |= (1<<13);
-			delay_ms(3000);
-			  GPIOC-> ODR &=~ (1<<13);
-			delay_ms(3000);
-		//code here	
-    }
+	while(1)
+	{
+//	  char Rstring[30];
+//		USART_Receive_data(&Rstring);
+		USART2_Send_String("Stringabcd ");
+		delay_ms(1000);
+		
+	}
 }
