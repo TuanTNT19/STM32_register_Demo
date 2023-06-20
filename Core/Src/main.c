@@ -4,7 +4,7 @@
 void TIM2_config()
 {
 	RCC->APB1ENR |= RCC_APB1ENR_TIM2EN; //Enable TIMEeR2 clock
-	TIM2->PSC = 63;
+	TIM2->PSC = 7;
 	TIM2->ARR = 65535;
 	TIM2->CR1 = (1<<0);//enable counter
 	while (!(TIM2->SR & TIM_SR_UIF));
@@ -27,11 +27,16 @@ int main(void)
 {
 
 	TIM2_config();
-    
+  RCC->APB2ENR |= (1<<4);
+	GPIOC-> CRH &= (0xFF0FFFFF);
+	GPIOC-> CRH |= (2<<20);
 	
     while (1)
     {
-	
+	     GPIOC-> ODR |= (1<<13);
+			delay_ms(3000);
+			  GPIOC-> ODR &=~ (1<<13);
+			delay_ms(3000);
 		//code here	
     }
 }
