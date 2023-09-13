@@ -17,8 +17,6 @@
 "registerl1\stm32f1xx_hal_flash_ex.o"
 "registerl1\stm32f1xx_hal_exti.o"
 "registerl1\system_stm32f1xx.o"
-"registerl1\lib.o"
-"registerl1\gpio.o"
 --library_type=microlib --strict --scatter "registerl1\registerl1.sct"
 --summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
 --info sizes --info totals --info unused --info veneers
