@@ -5,26 +5,26 @@
 uint8_t buffer[30];
 
 uint8_t datareceive[8];
-void TIM2_config()
-{
-	RCC->APB1ENR |= RCC_APB1ENR_TIM2EN; //Enable TIMEeR2 clock
-	TIM2->PSC = 7;
-	TIM2->ARR = 65535;
-	TIM2->CR1 = (1<<0);//enable counter
-	while (!(TIM2->SR & TIM_SR_UIF));
-}
-void delay_us(uint16_t us)
-{
-	TIM2->CNT=0;
-	while (TIM2->CNT < us);
-}
-void delay_ms(uint16_t ms)
-{
-	while (ms--)
-	{
-		delay_us(1000);
-	}
-}
+//void TIM2_config()
+//{
+//	RCC->APB1ENR |= RCC_APB1ENR_TIM2EN; //Enable TIMEeR2 clock
+//	TIM2->PSC = 7;
+//	TIM2->ARR = 65535;
+//	TIM2->CR1 = (1<<0);//enable counter
+//	while (!(TIM2->SR & TIM_SR_UIF));
+//}
+//void delay_us(uint16_t us)
+//{
+//	TIM2->CNT=0;
+//	while (TIM2->CNT < us);
+//}
+//void delay_ms(uint16_t ms)
+//{
+//	while (ms--)
+//	{
+//		delay_us(1000);
+//	}
+//}
 void GPIO_config()
 {
 	RCC->APB2ENR |= (1<<2);//enable clock for gpioa
@@ -35,9 +35,9 @@ void GPIO_config()
 	GPIOA->CRL &= (0xFFFF0FFF);
 	GPIOA->CRL |= (8<<12);//in push pull up/down
 	GPIOA->ODR |= (1<<3);// pull up
-	RCC->APB2ENR |= (1<<4);
-	GPIOC-> CRH &= (0xFF0FFFFF);
-	GPIOC-> CRH |= (2<<20);
+	RCC->APB2ENR |= (1<<4); // enable clock for gpioc
+	GPIOC-> CRH &= (0xF0FFFFFF);
+	GPIOC-> CRH |= (2<<24);// set gpioc pin 14 as a led
 
 }
 void USART2_config()
@@ -81,17 +81,13 @@ void UART_Getstring(uint8_t *str, uint8_t len)
 				break;
 				}
 		str++;
-
-
-	}
-	
-	
+  }
 }
 int main(void)
 {
 	GPIO_config();
 	USART2_config();
-	TIM2_config();
+	//TIM2_config();
 	GPIOC->ODR |= (1<<13);
 	while(1)
 	{
@@ -100,14 +96,12 @@ int main(void)
 		USART2_Send_String(datareceive);
 		if (strcmp(datareceive, "led_on")==0 )
 			{
-				GPIOC->ODR &=~ (1<<13);
+				GPIOC->ODR |= (1<<14);
 				 
 				}
-			else 
-				{
-					GPIOC->ODR |= (1<<13);
+		else 
+			{
+					GPIOC->ODR &=~ (1<<14);
 				}
-		
-		
-}
+	 }
 }
