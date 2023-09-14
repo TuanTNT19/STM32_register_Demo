@@ -1,79 +1,37 @@
+
 #include "stm32f1xx.h"
 #include <stdint.h>
-void ADC_Configuration(void);
-void GPIO_Configuration(void);
-uint16_t data=0;
-
-void TIM2_config()
+uint16_t adc_value;
+void ADC_Config()
 {
-	RCC->APB1ENR |= RCC_APB1ENR_TIM2EN; //Enable TIMEeR2 clock
-	TIM2->PSC = 7999;
-	TIM2->ARR = 65535;
-	TIM2->CR1 = (1<<0);//enable counter
-	while (!(TIM2->SR & TIM_SR_UIF));
-}
-void delay_ms(uint16_t ms)
-{
-	TIM2->CNT=0;
-	while (TIM2->CNT < ms);
-}
-void ADC_Configuration(void)
-{
-    // Enable the ADC1 clock
-    RCC->APB2ENR |= RCC_APB2ENR_ADC1EN;
-
-    // ADC configuration
-    ADC1->CR1 = 0; // Default configuration (continuous mode, right alignment, etc.)
-    
-    // Set the ADC prescaler (optional, depends on your clock source)
-    // ADCCLK = PCLK2 / (prescaler + 1)
-    RCC->CFGR |= 0<<14; // ADCCLK = PCLK2 / 6 = 12 MHz
-
-    // Configure the ADC for single conversion mode
-    ADC1->CR2 |= 1<<1; //  continuous conversion
-    ADC1->CR2 |= 1<<0;  // Turn on the ADC
-    
-    // Select the ADC channel (channel 0 in this example)
-    ADC1->SQR3 = 0; // Clear the channel selection
-   // ADC1->SQR3 |= 0; // Set the first conversion in the sequence to channel 0
-    
-    // Enable the ADC
-    ADC1->CR2 |=1<<0;
-    
-    // Perform an initial conversion (discarded)
-    ADC1->CR2 |= 1<<22;
-
+	RCC->APB2ENR|=(1<<2);//enable clock for GPIOA
+	RCC->APB2ENR|=(1<<9);//enable clock fof ADC1
+	GPIOA->CRL &=(0xFFFF0FFF);
+	GPIOA->CRL |=(0<<3);// set GPIOA_PIN3 as ADC1_Channel 3
+	ADC1->CR2 |= (1<<1);//turn on ADC continuous mode
+	ADC1->CR2 |=(1<<0);//enable ADC
+	ADC1->SMPR2|=(4<<9);//set up sample time
+	ADC1->SQR1 |=(0<<20);//total number of channel : 1
+	ADC1->SQR3 |=(3<<0); // set channel 3 in first conversation
+	ADC1->CR2 |= (1 << 2); // turn calibrate on 
+	while(!(ADC1->CR2 & (1 << 2)));//check calibrate
+	ADC1->CR2|=(1<<0);//enable ADC1
+	ADC1->CR2 |=(1<<22);//Perform an initial conversion (discarded)
 }
 uint16_t Read_ADC()
+	{
+		ADC1->CR2 |= ADC_CR2_SWSTART;
+		while(!(ADC1->SR &(1<<1)));
+		uint16_t value=ADC1->DR;
+		return value;
+		
+		}
+int main()
 {
-    while (!(ADC1->SR & ADC_SR_EOC));
-	uint16_t a = ADC1->DR;
-	return a;
-	}
-void GPIO_Configuration(void)
-{
-    // Enable GPIOA clock
-    RCC->APB2ENR |= RCC_APB2ENR_IOPAEN;
-
-    // Configure PA0 as analog input (channel 0)
-    GPIOA->CRL &= (0xFFFFFFF0); // Clear mode bits
-    GPIOA->CRL |= (0<<0);// Input analog
-}
-int main(void)
-{
-    // Initialize the system
-    SystemInit();
-    
-    // Configure GPIO and ADC
-    GPIO_Configuration();
-    ADC_Configuration();
-
-    while (1)
-    {
-
-
-        // Read the ADC value
-         data = Read_ADC();
-        
-    }
+			ADC_Config();
+			while(1)
+			{
+				adc_value=Read_ADC();
+				
+			}
 }
