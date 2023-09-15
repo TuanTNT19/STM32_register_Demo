@@ -9,6 +9,7 @@ CDefines=USE_HAL_DRIVER;STM32F103xB;USE_HAL_DRIVER;USE_HAL_DRIVER;
 [PreviousGenFiles]
 AdvancedFolderStructure=true
 HeaderFileListSize=3
+<<<<<<< HEAD
 HeaderFiles#0=E:/STM32 Code/registerl1/Core/Inc/stm32f1xx_it.h
 HeaderFiles#1=E:/STM32 Code/registerl1/Core/Inc/stm32f1xx_hal_conf.h
 HeaderFiles#2=E:/STM32 Code/registerl1/Core/Inc/main.h
@@ -21,5 +22,19 @@ SourceFiles#1=E:/STM32 Code/registerl1/Core/Src/stm32f1xx_hal_msp.c
 SourceFiles#2=E:/STM32 Code/registerl1/Core/Src/main.c
 SourceFolderListSize=1
 SourcePath#0=E:/STM32 Code/registerl1/Core/Src
+=======
+HeaderFiles#0=D:/stm32project/test_register/Core/Inc/stm32f1xx_it.h
+HeaderFiles#1=D:/stm32project/test_register/Core/Inc/stm32f1xx_hal_conf.h
+HeaderFiles#2=D:/stm32project/test_register/Core/Inc/main.h
+HeaderFolderListSize=1
+HeaderPath#0=D:/stm32project/test_register/Core/Inc
+HeaderFiles=;
+SourceFileListSize=3
+SourceFiles#0=D:/stm32project/test_register/Core/Src/stm32f1xx_it.c
+SourceFiles#1=D:/stm32project/test_register/Core/Src/stm32f1xx_hal_msp.c
+SourceFiles#2=D:/stm32project/test_register/Core/Src/main.c
+SourceFolderListSize=1
+SourcePath#0=D:/stm32project/test_register/Core/Src
+>>>>>>> fix
 SourceFiles=;
 
