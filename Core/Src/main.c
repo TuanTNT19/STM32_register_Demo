@@ -2,36 +2,58 @@
 #include "stm32f1xx.h"
 #include <stdint.h>
 uint16_t adc_value;
-void ADC_Config()
+void TIM2_conf()
 {
-	RCC->APB2ENR|=(1<<2);//enable clock for GPIOA
-	RCC->APB2ENR|=(1<<9);//enable clock fof ADC1
-	GPIOA->CRL &=(0xFFFF0FFF);
-	GPIOA->CRL |=(0<<3);// set GPIOA_PIN3 as ADC1_Channel 3
-	ADC1->CR2 |= (1<<1);//turn on ADC continuous mode
-	ADC1->CR2 |=(1<<0);//enable ADC
-	ADC1->SMPR2|=(4<<9);//set up sample time
-	ADC1->SQR1 |=(0<<20);//total number of channel : 1
-	ADC1->SQR3 |=(3<<0); // set channel 3 in first conversation
-	ADC1->CR2 |= (1 << 2); // turn calibrate on 
-	while(!(ADC1->CR2 & (1 << 2)));//check calibrate
-	ADC1->CR2|=(1<<0);//enable ADC1
-	ADC1->CR2 |=(1<<22);//Perform an initial conversion (discarded)
+	RCC->APB1ENR |= RCC_APB1ENR_TIM2EN;
+	TIM2->PSC=7999;
+	TIM2->CR1 |=(1<<0);
+	while (!(TIM2->SR & TIM_SR_UIF));
 }
-uint16_t Read_ADC()
-	{
-		ADC1->CR2 |= ADC_CR2_SWSTART;
-		while(!(ADC1->SR &(1<<1)));
-		uint16_t value=ADC1->DR;
-		return value;
-		
-		}
+void delay_ms(uint16_t ms)
+{
+	TIM2->CNT=0;
+	while(TIM2->CNT <= ms);
+}
+void Tim1_PWM_Config()
+{
+	RCC->APB2ENR |=(1<<2);//enable clock for GPIOA
+	GPIOA->CRH &=(0xFFFFFFF0);
+	GPIOA->CRH |=(10<<0); //set gpioa pin 8 as output alternate function push pull for timer 1 channel 1
+	GPIOA->CRH &=(0xFFFFFF0F);
+	GPIOA->CRH |=(10<<4);//set gpioa pin 9 as output alternate function push pull for timer 1 channel 2
+	RCC->APB2ENR |=(1<<11);
+	TIM1->PSC=7;
+	TIM1->ARR=999;
+	TIM1->CCER|=((1<<0)|(1<<4));//enable caption / compare output for channel 1 vs 2
+	TIM1->CCMR1 |=((6<<4) | (6<<12));//set mode 1 for channel 1 vs 2
+	TIM1->CCR1=0;
+	TIM1->CCR2=0;
+	TIM1->BDTR |= TIM_BDTR_MOE;// Enable the main output
+	TIM1->CR1|=(1<<0);
+	while(!(TIM1->SR & TIM_SR_UIF));
+}
+void set_duty_channel1(uint16_t duty1)
+{
+	TIM1->CCR1=duty1;
+}
+void set_duty_channel2(uint16_t duty2)
+{
+	TIM1->CCR2=duty2;
+}
 int main()
 {
-			ADC_Config();
-			while(1)
-			{
-				adc_value=Read_ADC();
-				
-			}
+	TIM2_conf();
+	Tim1_PWM_Config();
+	
+	while(1)
+	{
+		for (int i=0;i<1000;i+=5)
+		{
+			set_duty_channel1(i);
+			set_duty_channel2(1000-i);
+			delay_ms(10);
+		}
+		
+	}
 }
+
