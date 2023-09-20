@@ -1,37 +1,68 @@
-
-#include "stm32f1xx.h"
-#include <stdint.h>
-uint16_t adc_value;
-void ADC_Config()
+#include "stm32f10x.h"                  // Device header
+#include "stdio.h"
+uint16_t adc_value[2];
+void TIM2_config()
 {
-	RCC->APB2ENR|=(1<<2);//enable clock for GPIOA
-	RCC->APB2ENR|=(1<<9);//enable clock fof ADC1
-	GPIOA->CRL &=(0xFFFF0FFF);
-	GPIOA->CRL &=~(1<<3);// set GPIOA_PIN3 as ADC1_Channel 3
-	ADC1->CR2 |= (1<<1);//turn on ADC continuous mode
-	ADC1->CR2 |=(1<<0);//enable ADC
-	ADC1->SMPR2|=(4<<9);//set up sample time
-	ADC1->SQR1 &=~ (1<<20);//total number of channel : 1
-	ADC1->SQR3 |=(3<<0); // set channel 3 in first conversation
+	RCC->APB1ENR |= RCC_APB1ENR_TIM2EN; //Enable TIMEeR2 clock
+	TIM2->PSC = 7999;
+	TIM2->ARR = 65535;
+	TIM2->CR1 = (1<<0);//enable counter
+	while (!(TIM2->SR & TIM_SR_UIF));
+}
+void delay_ms(uint16_t ms)
+{
+	TIM2->CNT=0;
+	while (TIM2->CNT < ms);
+}
+void ADC1_Config()
+{
+	RCC->APB2ENR |= 1<<9;  // enable ADC1 clock
+	RCC->APB2ENR |= (1<<2);  // enable GPIOA clock
+	GPIOA->CRL &=(0xFFFFFF0F);
+	GPIOA->CRL &=~(1<<1);// set GPIOA_PIN1 as ADC1_Channel 1
+	GPIOA->CRL &=(0xFFF0FFFF);
+	GPIOA->CRL &=~(1<<4);// set GPIOA_PIN4 as ADC1_Channel 4
+	ADC1->CR1 |=(1<<8);//enable scan mode
+	ADC1->CR2|=(1<<1);//enable continous mode
+	ADC1->CR2|=(1<<8);//enble DMA
+	ADC1->CR2 &=~(1<<11); //right alignment
+	ADC1->CR2 |=(7<<17);//SWSTART in EXTSEL bit
+	ADC1->CR2|=(1<<20);//Conversion on external event enabled
+	ADC1->SMPR2 &= ~((7<<3) | (7<<12));  // Sampling time of 1.5 cycles for channel 1 and channel 4
+	ADC1->SQR1|=(1<<20);//2 conversions
+	ADC1->SQR3|=((1<<0)|(4<<5));//set up ADC channel for channel 1 and 4
 	ADC1->CR2 |= (1 << 2); // turn calibrate on 
 	while(!(ADC1->CR2 & (1 << 2)));//check calibrate
 	ADC1->CR2|=(1<<0);//enable ADC1
-	ADC1->CR2 |=(1<<22);//Perform an initial conversion (discarded)
+	ADC1->CR2 |=(1<<22);//enable conversion
 }
-uint16_t Read_ADC()
-	{
-		ADC1->CR2 |= ADC_CR2_SWSTART;
-		while(!(ADC1->SR &(1<<1)));
-		uint16_t value=ADC1->DR;
-		return value;
-		
-		}
+void DMA_Init()
+{
+	RCC->AHBENR |= 1<<0;//enable clock for DMA1
+	DMA1_Channel1->CCR &=~ (1<<4);//read from peripheral
+	DMA1_Channel1->CCR |=(1<<5);//enable circular mode
+	DMA1_Channel1->CCR |=(1<<7);//enable memory increment
+	DMA1_Channel1->CCR|=(1<<8);//peripheral size : 16 bit
+	DMA1_Channel1->CCR|=(1<<10);//memory size : 16 bit
+	
+}
+void DMA1_Config(uint32_t srcAdd, uint32_t destAdd, uint16_t size)
+{
+	DMA1_Channel1->CNDTR = size;
+	DMA1_Channel1->CPAR = srcAdd;
+	DMA1_Channel1->CMAR=destAdd;
+	DMA1_Channel1->CCR |=(1<<0);//enable channel DMA
+}
 int main()
 {
-			ADC_Config();
-			while(1)
-			{
-				adc_value=Read_ADC();
-				
-			}
+		TIM2_config();
+		ADC1_Config();
+		DMA_Init();
+  	DMA1_Config((uint32_t)&ADC1->DR, (uint32_t)adc_value, 2);
+	while(1)
+	{
+	
+	delay_ms(100);	
+	}
+	
 }
