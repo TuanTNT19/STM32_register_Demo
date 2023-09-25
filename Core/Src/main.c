@@ -1,68 +1,65 @@
-#include "stm32f10x.h"                  // Device header
-#include "stdio.h"
-uint16_t adc_value[2];
+#include "stm32f1xx.h"
+#include <stdint.h>
+
+void IWDG_Init() {
+    // Enable the IWDG by writing the unlock sequence to the Key register (IWDG_KR)
+    IWDG->KR = 0x5555; // Unlock access to the IWDG_PR and IWDG_RLR registers
+
+    // Set the prescaler value to divide the watchdog clock (40 kHz by default)
+    IWDG->PR = 7; // Prescaler set to 256
+
+    // Set the reload value to determine the watchdog's timeout period
+    IWDG->RLR = 312; // 12-bit value; max timeout
+
+    // Refresh the watchdog to apply the new settings
+   IWDG->KR = 0xAAAA; // Refresh the watchdog counter
+ //IWDG->KR = 0xCCCC;
+}
+
+void IWDG_Refresh() {
+    // Refresh the watchdog by writing the unlock sequence to the Key register (IWDG_KR)
+	IWDG->KR = 0xCCCC;
+    //IWDG->KR = 0xAAAA; // Refresh the watchdog counter
+}
 void TIM2_config()
 {
 	RCC->APB1ENR |= RCC_APB1ENR_TIM2EN; //Enable TIMEeR2 clock
-	TIM2->PSC = 7999;
+	TIM2->PSC = 7;
 	TIM2->ARR = 65535;
 	TIM2->CR1 = (1<<0);//enable counter
 	while (!(TIM2->SR & TIM_SR_UIF));
 }
-void delay_ms(uint16_t ms)
+void delay_us(uint16_t us)
 {
 	TIM2->CNT=0;
-	while (TIM2->CNT < ms);
+	while (TIM2->CNT < us);
 }
-void ADC1_Config()
+void delay_ms(uint16_t ms)
 {
-	RCC->APB2ENR |= 1<<9;  // enable ADC1 clock
-	RCC->APB2ENR |= (1<<2);  // enable GPIOA clock
-	GPIOA->CRL &=(0xFFFFFF0F);
-	GPIOA->CRL &=~(1<<1);// set GPIOA_PIN1 as ADC1_Channel 1
-	GPIOA->CRL &=(0xFFF0FFFF);
-	GPIOA->CRL &=~(1<<4);// set GPIOA_PIN4 as ADC1_Channel 4
-	ADC1->CR1 |=(1<<8);//enable scan mode
-	ADC1->CR2|=(1<<1);//enable continous mode
-	ADC1->CR2|=(1<<8);//enble DMA
-	ADC1->CR2 &=~(1<<11); //right alignment
-	ADC1->CR2 |=(7<<17);//SWSTART in EXTSEL bit
-	ADC1->CR2|=(1<<20);//Conversion on external event enabled
-	ADC1->SMPR2 &= ~((7<<3) | (7<<12));  // Sampling time of 1.5 cycles for channel 1 and channel 4
-	ADC1->SQR1|=(1<<20);//2 conversions
-	ADC1->SQR3|=((1<<0)|(4<<5));//set up ADC channel for channel 1 and 4
-	ADC1->CR2 |= (1 << 2); // turn calibrate on 
-	while(!(ADC1->CR2 & (1 << 2)));//check calibrate
-	ADC1->CR2|=(1<<0);//enable ADC1
-	ADC1->CR2 |=(1<<22);//enable conversion
+	while (ms--)
+	{
+		delay_us(1000);
+	}
 }
-void DMA_Init()
+void GPIOC_config()
 {
-	RCC->AHBENR |= 1<<0;//enable clock for DMA1
-	DMA1_Channel1->CCR &=~ (1<<4);//read from peripheral
-	DMA1_Channel1->CCR |=(1<<5);//enable circular mode
-	DMA1_Channel1->CCR |=(1<<7);//enable memory increment
-	DMA1_Channel1->CCR|=(1<<8);//peripheral size : 16 bit
-	DMA1_Channel1->CCR|=(1<<10);//memory size : 16 bit
-	
+	RCC->APB2ENR |= (1<<4);
+	GPIOC-> CRH &= (0xFF0FFFFF);
+	GPIOC-> CRH |= (2<<20);
 }
-void DMA1_Config(uint32_t srcAdd, uint32_t destAdd, uint16_t size)
+int main(void)
 {
-	DMA1_Channel1->CNDTR = size;
-	DMA1_Channel1->CPAR = srcAdd;
-	DMA1_Channel1->CMAR=destAdd;
-	DMA1_Channel1->CCR |=(1<<0);//enable channel DMA
-}
-int main()
-{
-		TIM2_config();
-		ADC1_Config();
-		DMA_Init();
-  	DMA1_Config((uint32_t)&ADC1->DR, (uint32_t)adc_value, 2);
+	GPIOC_config();
+	TIM2_config();
+	IWDG_Init();
+	 //delay_ms(5000);
+	GPIOC->ODR &= (0<<13);
+	IWDG_Init();
 	while(1)
 	{
-	
-	delay_ms(100);	
+		IWDG_Refresh();
+		GPIOC->ODR |= (1<<13);
+     delay_ms(3000);
+	   //IWDG_Refresh();
 	}
-	
 }
