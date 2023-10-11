@@ -1,72 +1,141 @@
-#include "gpio.h"
-#include "lib.h"
-void GPIO_PeriClockControl(GPIO_RegDef_t *pGPIOx, uint8_t EnorDi)
+#include "GPIO.h"
+#include "stm32f1xx.h"
+
+
+void GPIO_Config_Port(char GPIOx)
 {
-	if (EnorDi == ENABLE)
+	if (GPIOx == 'A')
 	{
-		if (pGPIOx==GPIOA)
-		{
-			GPIOA_PCLK_EN();
+		RCC->APB2ENR |= (1<<2);
 	}
-				if (pGPIOx==GPIOB)
-		{
-			GPIOB_PCLK_EN();
-	}
-				if (pGPIOx==GPIOC)
-		{
-			GPIOC_PCLK_EN();
-	}
-				if (pGPIOx==GPIOD)
-		{
-			GPIOD_PCLK_EN();
-	}
-				if (pGPIOx==GPIOE)
-		{
-			GPIOE_PCLK_EN();
-	}
-}
-	else if (EnorDi == DISABLE)
+	if (GPIOx=='B')
 	{
-			if (pGPIOx==GPIOA)
-		{
-			GPIOA_PCLK_DI();
-	}
-				if (pGPIOx==GPIOB)
-		{
-			GPIOB_PCLK_DI();
-	}
-				if (pGPIOx==GPIOC)
-		{
-			GPIOC_PCLK_DI();
-	}
-				if (pGPIOx==GPIOD)
-		{
-			GPIOD_PCLK_DI();
-	}
-				if (pGPIOx==GPIOE)
-		{
-			GPIOE_PCLK_DI();
-	}
-	}
+		RCC->APB2ENR |= (1<<3);
+		}
+		if (GPIOx=='C')
+	{
+		RCC->APB2ENR |= (1<<4);
+		}
 }
-void GPIO_Init(void)
+
+void GPIOA_Config_Pin(uint8_t Pinnum,char str)
 {
-// config the mode of GPIO_PIN
-	
-	
-	//config speed 
-	
-	//config pupd settings
-	
-	//config output
+ if (str =='O')
+ {
+	 if (Pinnum<=7)
+	 {
+		 GPIOA->CRL &=(0x00000000);
+		 GPIOA->CRL |=(2<<(4*Pinnum));
 	}
-void config (GPIO_RegDef_t *pGPIOx)
-{
-	pGPIOx->CRH&=~(0xFUL << 20);
-	pGPIOx->CRH |=(0x3UL << 20);
+	 else if (Pinnum>7)
+	 {
+		 GPIOA->CRH &=(0x00000000);
+		 GPIOA->CRH |=(2<<(4*(Pinnum-8)));
+	 }
+	}
+ else if (str=='I')
+ {
+	 if (Pinnum <=7)
+	 {
+		GPIOA->CRL &=(0x00000000);
+		GPIOA->CRL |=(0<<(4*Pinnum));
+		}
+	 else if (Pinnum >7)
+	 {
+		 GPIOA->CRH &=(0x00000000);
+		 GPIOA->CRH |=(0<<(4*(Pinnum - 8)));
+		}
+	 }
 }
-//void turnonled13C()
-//{
-//	GPIOC->ODR |= (1UL<<13);
-//	//GPIOC->BSRR
-//}
+void GPIOA_Pin_On(uint8_t Pinnum)
+{
+	GPIOA->ODR |=(1<<Pinnum);
+}
+void GPIOA_Pin_Off(uint8_t Pinnum)
+{
+	GPIOA->ODR &=(0<<Pinnum);
+}
+
+
+
+
+
+void GPIOB_Config_Pin(uint8_t Pinnum,char str)
+{
+ if (str =='O')
+ {
+	 if (Pinnum<=7)
+	 {
+		 GPIOB->CRL &=(0x00000000);
+		 GPIOB->CRL |=(2<<(4*Pinnum));
+	}
+	 else if (Pinnum>7)
+	 {
+		 GPIOB->CRH &=(0x00000000);
+		 GPIOB->CRH |=(2<<(4*(Pinnum-8)));
+	 }
+	}
+ else if (str=='I')
+ {
+	 if (Pinnum <=7)
+	 {
+		GPIOB->CRL &=(0x00000000);
+		GPIOB->CRL |=(0<<(4*Pinnum));
+		}
+	 else if (Pinnum >7)
+	 {
+		 GPIOB->CRH &=(0x00000000);
+		 GPIOB->CRH |=(0<<(4*(Pinnum - 8)));
+		}
+	 }
+}
+void GPIOB_Pin_On(uint8_t Pinnum)
+{
+	GPIOB->ODR |=(1<<Pinnum);
+}
+void GPIOB_Pin_Off(uint8_t Pinnum)
+{
+	GPIOB->ODR &=(0<<Pinnum);
+}
+
+
+
+
+void GPIOC_Config_Pin(uint8_t Pinnum,char str)
+{
+ if (str =='O')
+ {
+	 if (Pinnum<=7)
+	 {
+		 GPIOC->CRL &=(0x00000000);
+		 GPIOC->CRL |=(2<<(4*Pinnum));
+	}
+	 else if (Pinnum>7)
+	 {
+		 GPIOC->CRH &=(0x00000000);
+		 GPIOC->CRH |=(2<<(4*(Pinnum-8)));
+	 }
+	}
+ else if (str=='I')
+ {
+	 if (Pinnum <=7)
+	 {
+		GPIOC->CRL &=(0x00000000);
+		GPIOC->CRL |=(0<<(4*Pinnum));
+		}
+	 else if (Pinnum >7)
+	 {
+		 GPIOC->CRH &=(0x00000000);
+		 GPIOC->CRH |=(0<<(4*(Pinnum - 8)));
+		}
+	 }
+}
+void GPIOC_Pin_On(uint8_t Pinnum)
+{
+	GPIOC->ODR |=(1<<Pinnum);
+}
+void GPIOC_Pin_Off(uint8_t Pinnum)
+{
+	GPIOC->ODR &=(0<<Pinnum);
+}
+
