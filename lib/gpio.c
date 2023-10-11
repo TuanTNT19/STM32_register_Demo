@@ -1,21 +1,17 @@
 #include "GPIO.h"
 #include "stm32f1xx.h"
 
-
-void GPIO_Config_Port(char GPIOx)
+void GPIOA_Init()
 {
-	if (GPIOx == 'A')
-	{
-		RCC->APB2ENR |= (1<<2);
-	}
-	if (GPIOx=='B')
-	{
-		RCC->APB2ENR |= (1<<3);
-		}
-		if (GPIOx=='C')
-	{
-		RCC->APB2ENR |= (1<<4);
-		}
+	RCC->APB2ENR |= (1<<2);
+}
+void GPIOB_Init()
+{
+	RCC->APB2ENR |= (1<<3);
+}
+void GPIOC_Init()
+{
+	RCC->APB2ENR |= (1<<4);
 }
 
 void GPIOA_Config_Pin(uint8_t Pinnum,char str)
