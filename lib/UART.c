@@ -1,11 +1,19 @@
 #include "UART.h"
 #include "stm32f1xx.h"
 
+uint16_t Cal_BRR(uint32_t baudrate)
+{
+    double b = (double)8000000/(16*baudrate);
+    uint32_t man = (uint32_t )b;
+    uint32_t frac = (b - (double)man)*16;
+    uint16_t r = (frac<<0) | (man <<4);
+    return r;
+}
 void USART2_Init()
 {
 	RCC->APB1ENR |= (1<<17);//enable clock for USART2
 }
-void USART2_Config()
+void USART2_Config(uint32_t baudr)
 {
 	RCC->APB2ENR |= (1<<2);//enable clock for gpioa
 	// config gpioa pin 2 as alternative function TX
@@ -15,7 +23,7 @@ void USART2_Config()
 	GPIOA->CRL &= (0xFFFF0FFF);
 	GPIOA->CRL |= (8<<12);//in push pull up/down
 	GPIOA->ODR |= (1<<3);// pull up
-	USART2->BRR |= 833;
+	USART2->BRR = Cal_BRR(baudr);
 	USART2->CR1 |= (1<<13);
 	USART2->CR1 |= (1<<2); // RE=1.. Enable the Receiver
   USART2->CR1 |= (1<<3);  // TE=1.. Enable Transmitter
@@ -48,7 +56,7 @@ void USART3_Init()
 {
 	RCC->APB1ENR |= (1<<18);//enable clock for USART3
 }
-void USART3_Config()
+void USART3_Config(uint32_t baudr)
 {
 	RCC->APB2ENR |= (1<<3);//enable clock for gpiob
 	// config gpiob pin 10 as alternative function TX
@@ -58,7 +66,7 @@ void USART3_Config()
 	GPIOB->CRL &= (0xFFFF0FFF);
 	GPIOB->CRL |= (8<<12);//in push pull up/down
 	GPIOB->ODR |= (1<<11);// pull up
-	USART3->BRR |= 833;
+	USART3->BRR = Cal_BRR(baudr);
 	USART3->CR1 |= (1<<13);
 	USART3->CR1 |= (1<<2); // RE=1.. Enable the Receiver
   USART3->CR1 |= (1<<3);  // TE=1.. Enable Transmitter
@@ -91,7 +99,7 @@ void USART1_Init()
 {
 	RCC->APB2ENR |= (1<<14);//enable clock for USART1
 }
-void USART1_Config()
+void USART1_Config(uint32_t baudr)
 {
 	RCC->APB2ENR |= (1<<2);//enable clock for gpioa
 	// config gpioa pin 9 as alternative function TX
@@ -101,7 +109,7 @@ void USART1_Config()
 	GPIOA->CRL &= (0xFFFFF0FF);
 	GPIOA->CRL |= (8<<8);//in push pull up/down
 	GPIOA->ODR |= (1<<10);// pull up
-	USART1->BRR |= 833;
+	USART1->BRR = Cal_BRR(baudr);
 	USART1->CR1 |= (1<<13);
 	USART1->CR1 |= (1<<2); // RE=1.. Enable the Receiver
   USART1->CR1 |= (1<<3);  // TE=1.. Enable Transmitter
