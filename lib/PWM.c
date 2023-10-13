@@ -9,7 +9,7 @@ void TIM1_PWM_Config(uint8_t channel)
 	RCC->APB2ENR |=(1<<2);//enable clock for GPIOA
 	if (channel == 1)
 	{
-	GPIOA->CRH &=(0xFFFFFFF0);
+	GPIOA->CRH &=(0xFFFF0000);
 	GPIOA->CRH |=(10<<0); //set gpioa pin 8 as output alternate function push pull for timer 1 channel 1
 	TIM1->CCER |=(1<<0);
 	TIM1->CCMR1 |=(6<<4);
@@ -17,7 +17,7 @@ void TIM1_PWM_Config(uint8_t channel)
 	}
 	else if (channel == 2)
 	{
-	GPIOA->CRH &=(0xFFFFFF0F);
+	GPIOA->CRH &=(0xFFFF0000);
 	GPIOA->CRH |=(10<<4);//set gpioa pin 9 as output alternate function push pull for timer 1 channel 2
 	TIM1->CCER |=(1<<4);
 	TIM1->CCMR1 |=(6<<12);
@@ -25,7 +25,7 @@ void TIM1_PWM_Config(uint8_t channel)
 	}
 	else if (channel == 3)
 	{
-	GPIOA->CRH &=(0xFFFFF0FF);
+	GPIOA->CRH &=(0xFFFF0000);
 	GPIOA->CRH |=(10<<8);//set gpioa pin 10 as output alternate function push pull for timer 1 channel 3
 	TIM1->CCER |=(1<<8);
 	TIM1->CCMR2 |=(6<<4);
@@ -33,7 +33,7 @@ void TIM1_PWM_Config(uint8_t channel)
 	}
 	else if (channel == 4)
 	{
-	GPIOA->CRH &=(0xFFFF0FFF);
+	GPIOA->CRH &=(0xFFFF0000);
 	GPIOA->CRH |=(10<<12);//set gpioa pin 11 as output alternate function push pull for timer 1 channel 4
 	TIM1->CCER |=(1<<12);
 	TIM1->CCMR2 |=(6<<12);
@@ -63,6 +63,45 @@ void TIM1_PWM_duty(uint8_t channel, uint16_t duty)
 	{
 		TIM1->CCR4 = duty;
 	}
+	
+}
+void TIM1_PWM_Config_Multi(uint8_t number)
+{
+	      RCC->APB2ENR |=(1<<2);//enable clock for GPIOA
+        GPIOA->CRH &=(0xFFFF0000);
+	for (uint8_t i=number;i>0;i--)
+{
+        GPIOA->CRH |=(10<<((number-i)*4));
+        TIM1->CCER |= (1<<((number - i)*4));
+}
+if (number == 2)
+{
+        TIM1->CCMR1 |=((6<<4) | (6<<12));//set mode for channel 1 vs 2
+        TIM1->CCR1=0;
+        TIM1->CCR2=0;
+}
+else if (number == 3)
+{
+        TIM1->CCMR1 |=((6<<4) | (6<<12));//set mode 1 for channel 1 vs 2
+        TIM1->CCMR2 |=(6<<4);//set mode for channel 3
+        TIM1->CCR1=0;
+        TIM1->CCR2=0;
+        TIM1->CCR3=0;
+}
+else if (number == 4)
+{
+        TIM1->CCMR1 |=((6<<4) | (6<<12));//set mode 1 for channel 1 vs 2
+        TIM1->CCMR2 |=((6<<4)|(6<<12));//set mode for channal 3 vs 4
+        TIM1->CCR1=0;
+        TIM1->CCR2=0;
+        TIM1->CCR3=0;
+        TIM1->CCR4=0;
+}
+	TIM1->PSC = 7;
+	TIM1->ARR = 999;
+	TIM1->BDTR |= TIM_BDTR_MOE;// Enable the main output
+	TIM1->CR1|=(1<<0);
+	while(!(TIM1->SR & (1<<0)));
 	
 }
 
@@ -198,6 +237,53 @@ void TIM3_PWM_duty(uint8_t channel, uint16_t duty)
 	}
 	
 }
+void TIM3_PWM_Config_Multi(uint8_t number)
+{
+	
+	      RCC->APB2ENR |=(1<<2);//enable clock for GPIOA
+	      RCC->APB2ENR |=(1<<3);
+        GPIOA->CRL &=(0x00FFFFFF);
+	      GPIOB->CRL &=(0xFFFFFF00);
+	for (uint8_t i=number;i>0;i--)
+{
+        TIM3->CCER |= (1<<((number - i)*4));
+}
+if (number == 2)
+{
+	      GPIOA->CRL |=((10<<24) | (10<<28));
+        TIM3->CCMR1 |=((6<<4) | (6<<12));//set mode 1 for channel 1 vs 2
+        TIM3->CCR1=0;
+        TIM3->CCR2=0;
+}
+else if (number == 3)
+{
+	      GPIOA->CRL |=((10<<24) | (10<<28));
+	      GPIOB->CRL |=(10<<0);
+        TIM3->CCMR1 |=((6<<4) | (6<<12));//set mode 1 for channel 1 vs 2
+        TIM3->CCMR2 |=(6<<4);//set mode for channal 3 
+        TIM3->CCR1=0;
+        TIM3->CCR2=0;
+        TIM3->CCR3=0;
+}
+else if (number == 4)
+{
+	      GPIOA->CRL |=((10<<24) | (10<<28));
+	      GPIOB->CRL |=((10<<0) | (10<<4));
+        TIM3->CCMR1 |=((6<<4) | (6<<12));//set mode 1 for channel 1 vs 2
+        TIM3->CCMR2 |=((6<<4)|(6<<12));//set mode for channal 3 vs 4
+        TIM3->CCR1=0;
+        TIM3->CCR2=0;
+        TIM3->CCR3=0;
+        TIM3->CCR4=0;
+}
+	TIM3->PSC = 7;
+	TIM3->ARR = 999;
+	//TIM3->BDTR |= TIM_BDTR_MOE;// Enable the main output
+	TIM3->CR1|=(1<<0);
+	while(!(TIM3->SR & (1<<0)));
+	
+	
+}
 
 void TIM4_PWM_Init()
 {
@@ -243,6 +329,53 @@ void TIM4_PWM_Config(uint8_t channel)
 	TIM4->CR1|=(1<<0);
 	while(!(TIM4->SR & (1<<0)));
 }
+
+void TIM4_PWM_Config_Multi(uint8_t number)
+{
+	      RCC->APB2ENR |=(1<<3);
+	      GPIOB->CRL &=(0x00FFFFFF);
+	      GPIOB->CRH &= (0xFFFFFF00);
+	for (uint8_t i=number;i>0;i--)
+{
+        TIM4->CCER |= (1<<((number - i)*4));
+}
+if (number == 2)
+{
+	      GPIOB->CRL |=((10<<24) | (10<<28));
+        TIM4->CCMR1 |=((6<<4) | (6<<12));//set mode 1 for channel 1 vs 2
+        TIM4->CCR1=0;
+        TIM4->CCR2=0;
+}
+else if (number == 3)
+{
+	      GPIOB->CRL |=((10<<24) | (10<<28));
+	      GPIOB->CRH |=(10<<0);
+        TIM4->CCMR1 |=((6<<4) | (6<<12));//set mode 1 for channel 1 vs 2
+        TIM4->CCMR2 |=(6<<4);//set mode for channal 3 
+        TIM4->CCR1=0;
+        TIM4->CCR2=0;
+        TIM4->CCR3=0;
+}
+else if (number == 4)
+{
+	      GPIOB->CRL |=((10<<24) | (10<<28));
+	      GPIOB->CRH |=((10<<0) | (10<<4));
+        TIM4->CCMR1 |=((6<<4) | (6<<12));//set mode 1 for channel 1 vs 2
+        TIM4->CCMR2 |=((6<<4)|(6<<12));//set mode for channal 3 vs 4
+        TIM4->CCR1=0;
+        TIM4->CCR2=0;
+        TIM4->CCR3=0;
+        TIM4->CCR4=0;
+}
+	TIM4->PSC = 7;
+	TIM4->ARR = 999;
+	//TIM4->BDTR |= TIM_BDTR_MOE;// Enable the main output
+	TIM4->CR1|=(1<<0);
+	while(!(TIM4->SR & (1<<0)));
+	
+	
+}
+
 void TIM4_PWM_duty(uint8_t channel, uint16_t duty)
 {
 	if (channel == 1)
