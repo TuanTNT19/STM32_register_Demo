@@ -7,7 +7,6 @@ void ADC_Config()
 	RCC->APB2ENR|=(1<<2);//enable clock for GPIOA
 	RCC->APB2ENR|=(1<<9);//enable clock fof ADC1
 	GPIOA->CRL &=(0xFFFF0FFF);
-	GPIOA->CRL &=~(1<<3);// set GPIOA_PIN3 as ADC1_Channel 3
 	ADC1->CR2 |= (1<<1);//turn on ADC continuous mode
 	ADC1->CR2 |=(1<<0);//enable ADC
 	ADC1->SMPR2|=(4<<9);//set up sample time
