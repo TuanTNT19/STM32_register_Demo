@@ -19,9 +19,7 @@ void ADC1_Config()
 	RCC->APB2ENR |= 1<<9;  // enable ADC1 clock
 	RCC->APB2ENR |= (1<<2);  // enable GPIOA clock
 	GPIOA->CRL &=(0xFFFFFF0F);
-	GPIOA->CRL &=~(1<<1);// set GPIOA_PIN1 as ADC1_Channel 1
 	GPIOA->CRL &=(0xFFF0FFFF);
-	GPIOA->CRL &=~(1<<4);// set GPIOA_PIN4 as ADC1_Channel 4
 	ADC1->CR1 |=(1<<8);//enable scan mode
 	ADC1->CR2|=(1<<1);//enable continous mode
 	ADC1->CR2|=(1<<8);//enble DMA
